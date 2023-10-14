@@ -14,8 +14,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: apt install
-      run: sudo apt install -y qt6-base-dev cmake
+      run: sudo apt install -y qt6-base-dev qt6-base-dev-tools cmake
     - name: cmake 
       run: cmake -B build
     - name: make
-      run: make -C build -j8 all 
+      run: make -C build -j8 all

@@ -11,7 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 COMPONENTS Core Quick Xml Widgets Charts LinguistTools REQUIRED)
+find_package(Qt6 COMPONENTS Core Quick Widgets LinguistTools REQUIRED)
 
 file(GLOB TS_FILES *.ts)
 
@@ -33,7 +33,7 @@ add_dependencies(mvc-demo translations)
 target_compile_definitions(mvc-demo
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(mvc-demo
-  PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Widgets Qt6::Charts Qt6::Xml)
+  PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Widgets)
 
 qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 
