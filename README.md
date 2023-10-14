@@ -9,4 +9,7 @@ Demonstrates use of MVC design pattern in Qt/Qml.
 Following things are also shown
 - cmake
 - loading of data from c++ to qml and vice verse
-- i18n 
+- i18n
+
+Source codes are available at https://github.com/jmlich/mvc-demo/
+
