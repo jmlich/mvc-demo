@@ -1,15 +1,15 @@
-#include <QFile>
+#include "filereader.h"
+#include <QDebug>
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
 #include <QUrl>
-#include <QDebug>
-#include "filereader.h"
 
-#include <QTextStream>
 #include <QString>
+#include <QTextStream>
 
-FileReader::FileReader(QObject *parent) :
-    QObject(parent)
+FileReader::FileReader(QObject* parent)
+    : QObject(parent)
 {
 }
 
@@ -19,12 +19,13 @@ FileReader::FileReader(QObject *parent) :
  * @return
  */
 
-QString FileReader::toLocal(const QUrl &filename) {
+QString FileReader::toLocal(const QUrl& filename)
+{
     return filename.toLocalFile();
 }
 
-
-QByteArray FileReader::read(const QUrl &filename) {
+QByteArray FileReader::read(const QUrl& filename)
+{
     if (filename.isLocalFile()) {
         return read_local(filename.toLocalFile());
     }
@@ -37,8 +38,7 @@ QByteArray FileReader::read(const QUrl &filename) {
     return QByteArray();
 }
 
-
-QByteArray FileReader::read_local(const QString &filename)
+QByteArray FileReader::read_local(const QString& filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -49,27 +49,30 @@ QByteArray FileReader::read_local(const QString &filename)
     return file.readAll();
 }
 
-void FileReader::write(const QUrl &filename, QByteArray data) {
+void FileReader::write(const QUrl& filename, QByteArray data)
+{
     write_local(filename.toLocalFile(), data);
 }
 
-void FileReader::copy_file(const QUrl &filename, const QUrl &newFilename) {
+void FileReader::copy_file(const QUrl& filename, const QUrl& newFilename)
+{
 
     remove_if_exists(newFilename); // remove file with dst name if exist
 
     QFile::copy(filename.toLocalFile(), newFilename.toLocalFile());
 }
 
-void FileReader::remove_if_exists(const QUrl &filename) {
+void FileReader::remove_if_exists(const QUrl& filename)
+{
 
     if (file_exists(filename)) {
         QFile::remove(filename.toLocalFile());
     }
 }
 
-
-void FileReader::write_local(const QString &filename, QByteArray data) {
-    QFile file (filename);
+void FileReader::write_local(const QString& filename, QByteArray data)
+{
+    QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         qWarning() << "Cannot open " << filename << "for writing";
         return;
@@ -78,7 +81,8 @@ void FileReader::write_local(const QString &filename, QByteArray data) {
     file.write(data);
 }
 
-bool FileReader::file_exists(const QUrl &filename) {
+bool FileReader::file_exists(const QUrl& filename)
+{
     if (filename.isLocalFile()) {
         return file_exists_local(filename.toLocalFile());
     }
@@ -89,30 +93,36 @@ bool FileReader::file_exists(const QUrl &filename) {
     return false;
 }
 
-bool FileReader::file_exists_local(const QString &filename) {
+bool FileReader::file_exists_local(const QString& filename)
+{
     return QFileInfo(filename).isFile() && QFile(filename).exists();
 }
 
-bool FileReader::is_local_file(const QUrl &filename) {
+bool FileReader::is_local_file(const QUrl& filename)
+{
     return filename.isLocalFile();
 }
 
-bool FileReader::delete_file(const QUrl &filename) {
+bool FileReader::delete_file(const QUrl& filename)
+{
     return delete_file_local(filename.toLocalFile());
 }
 
-bool FileReader::delete_file_local(const QString &filename) {
+bool FileReader::delete_file_local(const QString& filename)
+{
     return QFile(filename).remove();
 }
 
-bool FileReader::is_dir_and_exists_local(const QString &dirname) {
+bool FileReader::is_dir_and_exists_local(const QString& dirname)
+{
     QFileInfo info(dirname);
-//    qDebug() << "is dir and exists " <<dirname << " exists: " <<info.exists() << " isDir: " << info.isDir();
+    //    qDebug() << "is dir and exists " <<dirname << " exists: " <<info.exists() << " isDir: " << info.isDir();
     return info.exists() && info.isDir();
 }
 
-QString FileReader::dirname_local(const QString &filename) {
+QString FileReader::dirname_local(const QString& filename)
+{
     QFileInfo info(filename);
     QUrl u = info.dir().path();
     return u.toLocalFile();
- }
+}

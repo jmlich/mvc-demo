@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: apt install
+      run: apt install qt6-base-dev cmake
     - name: cmake 
       run: cmake -B build
     - name: make
