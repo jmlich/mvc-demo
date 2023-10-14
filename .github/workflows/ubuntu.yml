@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: apt install
-      run: sudo apt install -y qt6-base-dev qt6-base-dev-tools qt6-declarative-dev cmake
+      run: sudo apt install -y qt6-base-dev qt6-base-dev-tools qt6-declarative-dev libqt6widgets6 libqt6quickwidgets6 qt6-l10n-tools cmake
     - name: cmake 
       run: cmake -B build
     - name: make
