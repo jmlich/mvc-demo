@@ -85,6 +85,14 @@ ApplicationWindow {
             target: null
             onTranslationChanged: (delta) => map.pan(-delta.x, -delta.y)
         }
+        WheelHandler {
+            id: wheel
+            acceptedDevices: Qt.platform.pluginName === "cocoa" || Qt.platform.pluginName === "wayland"
+                             ? PointerDevice.Mouse | PointerDevice.TouchPad
+                             : PointerDevice.Mouse
+            rotationScale: 1/120
+            property: "zoomLevel"
+        }
         MapItemView {
             model: salaryModel
             delegate: MapQuickItem {

@@ -36,3 +36,9 @@ target_link_libraries(mvc-demo
   PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Widgets Qt6::Charts Qt6::Xml)
 
 qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+
+#install(TARGETS mvc-demo RUNTIME
+#        DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+#install(FILES ${QM_FILES}
+#        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/mvc-demo/translations)
