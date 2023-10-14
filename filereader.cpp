@@ -6,7 +6,6 @@
 #include "filereader.h"
 
 #include <QTextStream>
-#include <QTextCodec>
 #include <QString>
 
 FileReader::FileReader(QObject *parent) :
@@ -68,20 +67,6 @@ void FileReader::remove_if_exists(const QUrl &filename) {
     }
 }
 
-void FileReader::writeUTF8(const QUrl &filename, QByteArray data) {
-
-    QFile file (filename.toLocalFile());
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        return;
-    }
-
-    QTextStream streamFileOut(&file);
-    streamFileOut.setCodec(QTextCodec::codecForName("UTF-8"));
-    streamFileOut << QString::fromUtf8(data);
-    streamFileOut.flush();
-
-    file.close();
-}
 
 void FileReader::write_local(const QString &filename, QByteArray data) {
     QFile file (filename);

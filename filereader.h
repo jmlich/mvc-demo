@@ -19,7 +19,6 @@ public:
     Q_INVOKABLE void copy_file(const QUrl &filename, const QUrl &newFilename);
 
     Q_INVOKABLE void write(const QUrl &filename, QByteArray data);
-    Q_INVOKABLE void writeUTF8(const QUrl &filename, QByteArray data);
     Q_INVOKABLE bool file_exists(const QUrl &filename);
     Q_INVOKABLE QByteArray read(const QUrl &filename);
 

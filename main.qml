@@ -1,9 +1,9 @@
-import QtQuick 2.14
-import QtCharts 2.14
-import QtQuick.Window 2.14
-import QtQuick.Controls 2.14
-import QtLocation 5.12
-import QtPositioning 5.12
+import QtQuick
+import QtCharts
+import QtQuick.Window
+import QtQuick.Controls
+import QtLocation
+import QtPositioning
 import cz.mlich 1.0
 
 ApplicationWindow {
@@ -71,14 +71,19 @@ ApplicationWindow {
 
     Map {
         id: map;
-        height: parent.height;
         anchors.left: listview.right
         anchors.top: parent.top;
         anchors.bottom: parent.bottom;
-        width: parent.width - listview.width;
+        anchors.right: parent.right
         zoomLevel: 3;
         plugin:     Plugin {
             name: "osm"
+        }
+
+        DragHandler {
+            id: drag
+            target: null
+            onTranslationChanged: (delta) => map.pan(-delta.x, -delta.y)
         }
         MapItemView {
             model: salaryModel
@@ -116,7 +121,7 @@ ApplicationWindow {
             }
         }
 
-        http.open("GET", "https://pcmlich.fit.vutbr.cz/salary.json");
+        http.open("GET", "https://raw.githubusercontent.com/jmlich/mvc-demo/master/salary.json");
         http.send();
     }
 
