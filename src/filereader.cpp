@@ -1,12 +1,11 @@
 #include "filereader.h"
 #include <QDebug>
-#include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QSaveFile>
 #include <QUrl>
 
 #include <QString>
-#include <QTextStream>
 
 FileReader::FileReader(QObject* parent)
     : QObject(parent)
@@ -24,78 +23,87 @@ QString FileReader::toLocal(const QUrl& filename)
     return filename.toLocalFile();
 }
 
-QByteArray FileReader::read(const QUrl& filename)
+/**
+ * @brief FileReader::toPath converts a file: or qrc: URL to a path QFile can open
+ * @param filename
+ * @return empty string for other schemes
+ */
+QString FileReader::toPath(const QUrl& filename)
 {
     if (filename.isLocalFile()) {
-        return read_local(filename.toLocalFile());
+        return filename.toLocalFile();
     }
     if (filename.scheme() == "qrc") {
-        QString resource_fn = ":" + filename.toString(QUrl::RemoveScheme);
-        return read_local(resource_fn);
+        return ":" + filename.path();
     }
-    qWarning() << "Cannot open " << filename << "for reading";
-
-    return QByteArray();
+    return QString();
 }
 
-QByteArray FileReader::read_local(const QString& filename)
+QString FileReader::read(const QUrl& filename)
+{
+    return read_local(toPath(filename));
+}
+
+QString FileReader::read_local(const QString& filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "Cannot open " << filename << "for reading";
-        return QByteArray();
+        return QString();
     }
 
-    return file.readAll();
+    return QString::fromUtf8(file.readAll());
 }
 
-void FileReader::write(const QUrl& filename, QByteArray data)
+bool FileReader::write(const QUrl& filename, const QString& data)
 {
-    write_local(filename.toLocalFile(), data);
+    return write_local(toPath(filename), data);
 }
 
-void FileReader::copy_file(const QUrl& filename, const QUrl& newFilename)
+bool FileReader::copy_file(const QUrl& filename, const QUrl& newFilename)
 {
+    if (!file_exists(filename)) {
+        qWarning() << "Cannot copy " << filename << ": file does not exist";
+        return false;
+    }
 
     remove_if_exists(newFilename); // remove file with dst name if exist
 
-    QFile::copy(filename.toLocalFile(), newFilename.toLocalFile());
+    return QFile::copy(toPath(filename), toPath(newFilename));
 }
 
 void FileReader::remove_if_exists(const QUrl& filename)
 {
 
     if (file_exists(filename)) {
-        QFile::remove(filename.toLocalFile());
+        QFile::remove(toPath(filename));
     }
 }
 
-void FileReader::write_local(const QString& filename, QByteArray data)
+bool FileReader::write_local(const QString& filename, const QString& data)
 {
-    QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    QSaveFile file(filename);
+    if (!file.open(QIODevice::WriteOnly)) {
         qWarning() << "Cannot open " << filename << "for writing";
-        return;
+        return false;
     }
 
-    file.write(data);
+    file.write(data.toUtf8());
+    if (!file.commit()) {
+        qWarning() << "Cannot write " << filename;
+        return false;
+    }
+    return true;
 }
 
 bool FileReader::file_exists(const QUrl& filename)
 {
-    if (filename.isLocalFile()) {
-        return file_exists_local(filename.toLocalFile());
-    }
-    if (filename.scheme() == "qrc") {
-        QString resource_fn = ":" + filename.toString(QUrl::RemoveScheme);
-        return file_exists_local(resource_fn);
-    }
-    return false;
+    return file_exists_local(toPath(filename));
 }
 
 bool FileReader::file_exists_local(const QString& filename)
 {
-    return QFileInfo(filename).isFile() && QFile(filename).exists();
+    return QFileInfo(filename).isFile();
 }
 
 bool FileReader::is_local_file(const QUrl& filename)
@@ -105,7 +113,7 @@ bool FileReader::is_local_file(const QUrl& filename)
 
 bool FileReader::delete_file(const QUrl& filename)
 {
-    return delete_file_local(filename.toLocalFile());
+    return delete_file_local(toPath(filename));
 }
 
 bool FileReader::delete_file_local(const QString& filename)
@@ -115,14 +123,10 @@ bool FileReader::delete_file_local(const QString& filename)
 
 bool FileReader::is_dir_and_exists_local(const QString& dirname)
 {
-    QFileInfo info(dirname);
-    //    qDebug() << "is dir and exists " <<dirname << " exists: " <<info.exists() << " isDir: " << info.isDir();
-    return info.exists() && info.isDir();
+    return QFileInfo(dirname).isDir();
 }
 
 QString FileReader::dirname_local(const QString& filename)
 {
-    QFileInfo info(filename);
-    QUrl u = info.dir().path();
-    return u.toLocalFile();
+    return QFileInfo(filename).absolutePath();
 }

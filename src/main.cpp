@@ -1,22 +1,22 @@
-#include <QApplication>
+#include <QDebug>
+#include <QGuiApplication>
+#include <QLocale>
 #include <QQmlApplicationEngine>
-#include <QtCore>
-#include <QtQml>
+#include <QQmlEngine>
+#include <QTranslator>
 
 #include "filereader.h"
 
 int main(int argc, char* argv[])
 {
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QGuiApplication app(argc, argv);
 
-    QApplication app(argc, argv);
-
-    QQmlApplicationEngine engine;
     QTranslator translator;
+    QQmlApplicationEngine engine;
 
     QString i18nFilename = QLatin1String("mvc-demo_") + QLocale::system().name();
 
-    if (translator.load(i18nFilename, "./")) {
+    if (translator.load(i18nFilename, QCoreApplication::applicationDirPath())) {
         qDebug() << "loading translations from " << i18nFilename;
         app.installTranslator(&translator);
     } else {

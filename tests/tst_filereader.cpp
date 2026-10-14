@@ -23,37 +23,43 @@ private slots:
 
     void writeAndReadLocal()
     {
-        reader.write_local(path("a.txt"), "hello");
+        QVERIFY(reader.write_local(path("a.txt"), "hello"));
         QVERIFY(reader.file_exists_local(path("a.txt")));
-        QCOMPARE(reader.read_local(path("a.txt")), QByteArray("hello"));
+        QCOMPARE(reader.read_local(path("a.txt")), QString("hello"));
+    }
+
+    void writeAndReadUtf8()
+    {
+        QVERIFY(reader.write_local(path("utf8.txt"), QString::fromUtf8("Česko")));
+        QCOMPARE(reader.read_local(path("utf8.txt")), QString::fromUtf8("Česko"));
     }
 
     void writeLocalTruncates()
     {
         reader.write_local(path("b.txt"), "long content");
         reader.write_local(path("b.txt"), "short");
-        QCOMPARE(reader.read_local(path("b.txt")), QByteArray("short"));
+        QCOMPARE(reader.read_local(path("b.txt")), QString("short"));
     }
 
     void writeLocalToMissingDir()
     {
         QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cannot open .* for writing"));
-        reader.write_local(path("missing/c.txt"), "x");
+        QVERIFY(!reader.write_local(path("missing/c.txt"), "x"));
         QVERIFY(!reader.file_exists_local(path("missing/c.txt")));
     }
 
     void readLocalMissingFile()
     {
         QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cannot open .* for reading"));
-        QCOMPARE(reader.read_local(path("nothing.txt")), QByteArray());
+        QCOMPARE(reader.read_local(path("nothing.txt")), QString());
     }
 
     void writeAndReadUrl()
     {
         QUrl url = QUrl::fromLocalFile(path("d.txt"));
-        reader.write(url, "via url");
+        QVERIFY(reader.write(url, "via url"));
         QVERIFY(reader.file_exists(url));
-        QCOMPARE(reader.read(url), QByteArray("via url"));
+        QCOMPARE(reader.read(url), QString("via url"));
     }
 
     void readQrc()
@@ -68,7 +74,15 @@ private slots:
         QUrl url("https://example.com/salary.json");
         QVERIFY(!reader.file_exists(url));
         QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cannot open .* for reading"));
-        QCOMPARE(reader.read(url), QByteArray());
+        QCOMPARE(reader.read(url), QString());
+    }
+
+    void writeQrcFails()
+    {
+        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cannot open .* for writing"));
+        QVERIFY(!reader.write(QUrl("qrc:/main.qml"), "x"));
+        QVERIFY(!reader.delete_file(QUrl("qrc:/main.qml")));
+        QVERIFY(reader.file_exists(QUrl("qrc:/main.qml")));
     }
 
     void fileExistsLocalIsFalseForDir()
@@ -93,8 +107,24 @@ private slots:
         QUrl dst = QUrl::fromLocalFile(path("dst.txt"));
         reader.write(src, "new");
         reader.write(dst, "old");
-        reader.copy_file(src, dst);
-        QCOMPARE(reader.read(dst), QByteArray("new"));
+        QVERIFY(reader.copy_file(src, dst));
+        QCOMPARE(reader.read(dst), QString("new"));
+    }
+
+    void copyFileFromQrc()
+    {
+        QUrl dst = QUrl::fromLocalFile(path("copied.qml"));
+        QVERIFY(reader.copy_file(QUrl("qrc:/main.qml"), dst));
+        QVERIFY(reader.read(dst).contains("ApplicationWindow"));
+    }
+
+    void copyFileKeepsDestinationWhenSourceIsMissing()
+    {
+        QUrl dst = QUrl::fromLocalFile(path("keep.txt"));
+        reader.write(dst, "keep");
+        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cannot copy .* file does not exist"));
+        QVERIFY(!reader.copy_file(QUrl::fromLocalFile(path("no-source.txt")), dst));
+        QCOMPARE(reader.read(dst), QString("keep"));
     }
 
     void deleteFile()
@@ -132,8 +162,6 @@ private slots:
 
     void dirnameLocal()
     {
-        QEXPECT_FAIL("", "dirname_local() turns a plain path into a QUrl without a scheme and returns an empty string",
-            Continue);
         QCOMPARE(reader.dirname_local(path("i.txt")), tmp.path());
     }
 };
