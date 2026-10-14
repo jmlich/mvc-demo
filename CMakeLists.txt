@@ -13,12 +13,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 COMPONENTS Core Quick Widgets LinguistTools REQUIRED)
 
-file(GLOB TS_FILES *.ts)
+file(GLOB TS_FILES translations/*.ts)
 
 add_executable(mvc-demo
-    main.cpp
-    filereader.cpp
-    qml.qrc
+    src/main.cpp
+    src/filereader.cpp
+    qml/qml.qrc
     ${TS_FILES}
     )
 
