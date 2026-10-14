@@ -8,17 +8,17 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        version: ['6.5.2']
+        version: ['6.8.3']
     steps:
     - uses: actions/checkout@v1
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ matrix.version }}
         host: 'windows'
         target: 'desktop'
-        arch: 'win64_msvc2019_64'
+        arch: 'win64_msvc2022_64'
         modules: 'qtwebengine qtlocation qtpositioning'
         tools: 'tools_opensslv3_x64'
 
@@ -26,10 +26,9 @@ jobs:
     - name: Build
       if: startsWith(matrix.os, 'windows')
       run: |
-        call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         mkdir build
         cd build
-        cmake -DCMAKE_PREFIX_PATH="C:\Qt\6.5.2\msvc2019_64" -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=RELEASE -DDEPLOY_QT_LIBRARIES=ON -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ..
+        cmake -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%" -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=RELEASE -DDEPLOY_QT_LIBRARIES=ON -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ..
         if %errorlevel% neq 0 exit /b %errorlevel%
         cmake --build . --config Release
         if %errorlevel% neq 0 exit /b %errorlevel%
