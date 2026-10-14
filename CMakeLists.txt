@@ -11,6 +11,12 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(ENABLE_COVERAGE "Build with gcov coverage instrumentation" OFF)
+if(ENABLE_COVERAGE)
+    add_compile_options(--coverage)
+    add_link_options(--coverage)
+endif()
+
 find_package(Qt6 COMPONENTS Core Quick Widgets LinguistTools REQUIRED)
 
 file(GLOB TS_FILES translations/*.ts)
@@ -36,6 +42,9 @@ target_link_libraries(mvc-demo
   PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Widgets)
 
 qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+
+enable_testing()
+add_subdirectory(tests)
 
 #install(TARGETS mvc-demo RUNTIME
 #        DESTINATION ${CMAKE_INSTALL_BINDIR})
